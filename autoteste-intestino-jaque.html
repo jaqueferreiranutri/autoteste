@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoteste — Seu intestino está inflamado? | Jaqueline Ferreira Nutricionista</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --borgonha: #6B2737;
+    --borgonha-light: #8B3347;
+    --verde: #2D6B52;
+    --verde-light: #3A8A6A;
+    --verde-pale: #E8F4EF;
+    --verde-pale2: #D4EDE4;
+    --creme: #FAF8F5;
+    --creme2: #F3EFE9;
+    --text: #1C1C1A;
+    --text-mid: #4A4A47;
+    --text-muted: #7A7A77;
+    --border: rgba(28,28,26,0.1);
+    --border-mid: rgba(28,28,26,0.18);
+    --amber-pale: #FDF3E3;
+    --amber: #B07A20;
+    --red-pale: #FBF0EE;
+    --red: #8B3030;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--creme);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* LINHAS VERTICAIS DE FUNDO — marca VITA */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 79px,
+      rgba(45,107,82,0.045) 79px,
+      rgba(45,107,82,0.045) 80px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 32px 0 24px;
+    text-align: center;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .logo-text {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--verde);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+  }
+
+  .logo-divider {
+    width: 32px;
+    height: 1px;
+    background: var(--verde);
+    margin: 8px auto;
+    opacity: 0.4;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* INTRO */
+  .intro { margin-bottom: 40px; }
+
+  .badge-intro {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--verde);
+    background: var(--verde-pale);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--borgonha);
+  }
+
+  .intro-desc {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .intro-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .intro-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--verde); display: inline-block; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 28px; }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-track {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--verde);
+    border-radius: 1px;
+    transition: width 0.5s ease;
+  }
+
+  /* QUESTÃO */
+  .q-section { animation: fadeUp 0.35s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--verde);
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+  .opt {
+    background: #fff;
+    border: 0.5px solid var(--border-mid);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text-mid);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+    line-height: 1.4;
+    position: relative;
+  }
+
+  .opt::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+    background: transparent;
+    transition: background 0.18s;
+  }
+
+  .opt:hover {
+    border-color: var(--verde);
+    color: var(--text);
+    background: var(--verde-pale);
+  }
+
+  .opt.selected {
+    border-color: var(--verde);
+    background: var(--verde-pale);
+    color: var(--verde);
+    font-weight: 500;
+  }
+
+  .opt.selected::before { background: var(--verde); }
+
+  /* NAVEGAÇÃO */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-back:hover { color: var(--text); }
+
+  .btn-next {
+    background: var(--verde);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-next:hover { background: var(--verde-light); }
+  .btn-next:active { transform: scale(0.98); }
+  .btn-next:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+  /* RESULTADO */
+  .result-section { animation: fadeUp 0.5s ease; padding-bottom: 60px; }
+
+  .result-headline {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .score-block {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .score-num {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 64px;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .score-label { font-size: 14px; color: var(--text-muted); padding-bottom: 10px; line-height: 1.4; }
+
+  .score-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .score-bar { height: 100%; border-radius: 2px; transition: width 1s ease; }
+
+  .result-card {
+    border: 0.5px solid var(--border-mid);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+    background: #fff;
+  }
+
+  .result-card-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .result-card-desc {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 18px;
+  }
+
+  .result-items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .result-items li {
+    font-size: 13px;
+    color: var(--text-mid);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+
+  .result-items li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--verde);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* CTA CARD */
+  .cta-card {
+    background: var(--verde);
+    border-radius: 14px;
+    padding: 28px 24px;
+    margin-bottom: 32px;
+    color: #fff;
+  }
+
+  .cta-card h2 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+    color: #fff;
+  }
+
+  .cta-card p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 20px;
+  }
+
+  .btn-cta {
+    display: block;
+    width: 100%;
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--verde);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .btn-cta:hover { opacity: 0.9; }
+
+  .btn-refazer {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 0.5px solid var(--border-mid);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 40px;
+    transition: color 0.2s;
+  }
+
+  .btn-refazer:hover { color: var(--text); }
+
+  /* BADGE resultado */
+  .res-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .badge-leve { background: var(--verde-pale); color: var(--verde); }
+  .badge-moderado { background: var(--amber-pale); color: var(--amber); }
+  .badge-intenso { background: var(--red-pale); color: var(--red); }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 24px 0;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--verde);
+    margin-bottom: 6px;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .footer-insta {
+    font-size: 12px;
+    color: var(--verde);
+    margin-top: 10px;
+  }
+
+  /* LINHAS VERTICAIS DECORATIVAS — marca VITA nos cards */
+  .vita-lines {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 20px;
+  }
+
+  .vita-lines span {
+    display: block;
+    width: 1.5px;
+    border-radius: 1px;
+    background: var(--verde);
+    opacity: 0.25;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo-text">jaqueline ferreira</div>
+    <div class="logo-divider"></div>
+    <div class="logo-sub">nutricionista</div>
+  </header>
+
+  <div id="quiz-screen">
+    <div class="intro">
+      <div class="vita-lines">
+        <span style="height:20px"></span>
+        <span style="height:28px"></span>
+        <span style="height:16px"></span>
+        <span style="height:32px"></span>
+        <span style="height:14px"></span>
+      </div>
+      <div class="badge-intro">autoteste gratuito</div>
+      <h1>Seu intestino está <em>inflamado?</em></h1>
+      <p class="intro-desc">
+        Responda 10 perguntas sobre como você tem se sentido nos últimos 30 dias e descubra o nível de inflamação intestinal do seu corpo — com orientações personalizadas ao final.
+      </p>
+      <div class="intro-meta">
+        <span><span class="dot"></span> 10 perguntas</span>
+        <span><span class="dot"></span> Menos de 2 minutos</span>
+        <span><span class="dot"></span> Resultado imediato</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span id="step-label">Pergunta 1 de 10</span>
+        <span id="pct-label">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="q-section" id="q-section">
+      <div class="q-number" id="q-num">Pergunta 01</div>
+      <p class="q-text" id="q-text"></p>
+      <div class="options" id="options"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn-back" id="btn-back" onclick="goBack()" style="visibility:hidden">&#8592; Voltar</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()" disabled>Próxima &rarr;</button>
+    </div>
+  </div>
+
+  <div id="result-screen" style="display:none">
+    <div class="result-section" id="result-content"></div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">jaqueline ferreira</div>
+    <p class="footer-note">Este autoteste é uma ferramenta educativa de triagem e não substitui avaliação clínica. Apenas um profissional de saúde pode diagnosticar e tratar condições intestinais.</p>
+    <div class="footer-insta">@nutri.jaqueferreira</div>
+  </footer>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Sua barriga incha ao longo do dia, mesmo quando você come pouco?",
+    opts: ["Não, raramente acontece", "Às vezes, 1 a 2 vezes por semana", "Com frequência, quase todo dia", "Sempre, independente do que eu como"]
+  },
+  {
+    text: "Você tem gases constantes ou desconforto abdominal depois de comer?",
+    opts: ["Não tenho esse problema", "Eventualmente, sem me incomodar muito", "Com certa frequência, me incomoda", "Todo dia, evito situações sociais por causa disso"]
+  },
+  {
+    text: "Seu intestino funciona de forma irregular — ora prende, ora solta, sem padrão?",
+    opts: ["Não, funciona normalmente", "Eventualmente", "Com frequência", "É minha realidade todo dia"]
+  },
+  {
+    text: "Você sente um cansaço que o sono não resolve — acorda cansada mesmo depois de dormir bem?",
+    opts: ["Não, acordo disposta", "Às vezes sim", "Na maior parte dos dias", "Todo dia, sem exceção"]
+  },
+  {
+    text: "Você tem notado queda de cabelo fora do normal nos últimos meses?",
+    opts: ["Não percebi nada diferente", "Uma queda leve", "Queda moderada, já me preocupa", "Queda intensa, difícil de ignorar"]
+  },
+  {
+    text: "Você sente dores ou desconfortos pelo corpo sem causa aparente — articulações, cabeça, músculo?",
+    opts: ["Não tenho esse problema", "Raramente", "Com alguma frequência", "Com muita frequência"]
+  },
+  {
+    text: "Você sente dificuldade para perder peso mesmo quando está comendo bem e se cuidando?",
+    opts: ["Não, meu peso responde normalmente", "Um pouco mais difícil que antes", "Muito difícil, parece travado", "Completamente travado — nada funciona"]
+  },
+  {
+    text: "Você tem névoa mental — dificuldade de concentrar ou memória falhando mais do que o normal?",
+    opts: ["Não, minha mente está clara", "Às vezes levemente", "Com frequência me atrapalha", "Todo dia, é muito intenso"]
+  },
+  {
+    text: "Sua pele tem apresentado problemas recentes — acne, vermelhidão, ressecamento ou coceira?",
+    opts: ["Pele tranquila, sem alterações", "Pequenas alterações", "Problemas moderados e recorrentes", "Problemas persistentes que me incomodam"]
+  },
+  {
+    text: "Você já recebeu algum diagnóstico intestinal de médico ou nutricionista — SIBO, disbiose, SII, colite ou permeabilidade?",
+    opts: ["Nunca fiz exames específicos para isso", "Fiz exames, nada conclusivo", "Tenho um diagnóstico mas sem protocolo claro", "Tenho diagnóstico e já tentei vários tratamentos sem resultado consistente"]
+  }
+];
+
+let current = 0;
+let answers = new Array(10).fill(null);
+
+function render() {
+  const q = questions[current];
+  const pct = Math.round((current / questions.length) * 100);
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = pct + '%';
+  document.getElementById('step-label').textContent = 'Pergunta ' + (current + 1) + ' de 10';
+  document.getElementById('q-num').textContent = 'Pergunta ' + String(current + 1).padStart(2, '0');
+  document.getElementById('q-text').textContent = q.text;
+
+  document.getElementById('btn-back').style.visibility = current > 0 ? 'visible' : 'hidden';
+
+  const nextBtn = document.getElementById('btn-next');
+  const isLast = current === questions.length - 1;
+  nextBtn.textContent = isLast ? 'Ver resultado' : 'Próxima →';
+  nextBtn.disabled = answers[current] === null;
+
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt' + (answers[current] === i ? ' selected' : '');
+    btn.textContent = o;
+    btn.onclick = () => { answers[current] = i; render(); };
+    optsEl.appendChild(btn);
+  });
+
+  const qs = document.getElementById('q-section');
+  qs.style.animation = 'none';
+  qs.offsetHeight;
+  qs.style.animation = 'fadeUp 0.35s ease';
+}
+
+function goNext() {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) { current++; render(); }
+  else showResult();
+}
+
+function goBack() {
+  if (current > 0) { current--; render(); }
+}
+
+function showResult() {
+  const score = answers.reduce((s, v) => s + (v || 0), 0);
+  const max = questions.length * 3;
+  const pct = Math.round((score / max) * 100);
+
+  let level, badgeClass, barColor, scoreColor, title, desc, items, ctaTitle, ctaDesc, ctaBtn;
+
+  if (pct <= 30) {
+    level = 'Sinais leves';
+    badgeClass = 'badge-leve';
+    barColor = '#2D6B52';
+    scoreColor = '#2D6B52';
+    title = 'Seu intestino está se comunicando';
+    desc = 'Você apresenta sinais leves de inflamação intestinal. Seu corpo já está dando avisos que merecem atenção — antes que os sintomas se intensifiquem e comprometam sua qualidade de vida.';
+    items = [
+      'Pequenas alterações na digestão já indicam desequilíbrio na microbiota',
+      'Prevenção agora é muito mais simples do que tratamento depois',
+      'Uma avaliação nutricional pode identificar o que está por trás dos sintomas'
+    ];
+    ctaTitle = 'O que fazer agora?';
+    ctaDesc = 'Quer entender o que está por trás desses sinais antes que virem um problema maior? Uma consulta de avaliação pode te dar clareza e um plano preventivo.';
+    ctaBtn = 'Quero agendar uma avaliação';
+  } else if (pct <= 65) {
+    level = 'Sinais moderados';
+    badgeClass = 'badge-moderado';
+    barColor = '#B07A20';
+    scoreColor = '#B07A20';
+    title = 'Seu intestino está pedindo socorro';
+    desc = 'Você tem sinais moderados a significativos de inflamação intestinal. Os sintomas já estão impactando sua qualidade de vida — isso não é normal nem inevitável. Tem solução.';
+    items = [
+      'Inchaço, cansaço e irregularidade têm uma causa-raiz identificável e tratável',
+      'Seu corpo não precisa de mais restrição — precisa de um protocolo em fases',
+      'Com a abordagem certa, os resultados aparecem nos primeiros 30 dias'
+    ];
+    ctaTitle = 'Seus sintomas têm uma solução';
+    ctaDesc = 'O que você está sentindo tem um padrão claro. Com um protocolo personalizado em fases — Alívio, Reconstrução e Liberdade — é possível tratar a causa, não só controlar os sintomas.';
+    ctaBtn = 'Quero conhecer o protocolo';
+  } else {
+    level = 'Sinais intensos';
+    badgeClass = 'badge-intenso';
+    barColor = '#8B3030';
+    scoreColor = '#6B2737';
+    title = 'Seu intestino está em alerta máximo';
+    desc = 'Você apresenta sinais intensos de inflamação intestinal sistêmica. Esses sintomas afetam muito mais do que a digestão — e provavelmente você já tentou várias soluções sem resultado consistente.';
+    items = [
+      'Inflamação crônica impacta peso, cabelo, energia, pele, humor e concentração',
+      'Probiótico genérico e restrição alimentar não resolvem — podem piorar o quadro',
+      'Você precisa de um protocolo clínico em fases que trate a causa raiz do seu caso'
+    ];
+    ctaTitle = 'Você já sabe que precisa de ajuda especializada';
+    ctaDesc = 'Você não precisa de mais uma lista de restrições. Precisa de um protocolo clínico estruturado para o seu caso — com fases claras de alívio, reconstrução e liberdade alimentar. É exatamente isso que faço.';
+    ctaBtn = 'Quero conversar sobre meu caso';
+  }
+
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  document.getElementById('result-content').innerHTML = `
+    <p class="result-headline">Resultado do seu autoteste</p>
+
+    <div class="vita-lines">
+      <span style="height:24px"></span>
+      <span style="height:36px"></span>
+      <span style="height:18px"></span>
+      <span style="height:42px"></span>
+      <span style="height:14px"></span>
+    </div>
+
+    <span class="res-badge ${badgeClass}">${level}</span>
+
+    <div class="score-block">
+      <span class="score-num" style="color:${scoreColor}">${pct}</span>
+      <span class="score-label">pontos de<br>inflamação de 100</span>
+    </div>
+
+    <div class="score-bar-wrap">
+      <div class="score-bar" style="width:0%;background:${barColor}" id="score-bar-anim"></div>
+    </div>
+
+    <div class="result-card">
+      <h2 class="result-card-title">${title}</h2>
+      <p class="result-card-desc">${desc}</p>
+      <ul class="result-items">
+        ${items.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="cta-card">
+      <h2>${ctaTitle}</h2>
+      <p>${ctaDesc}</p>
+      <a href="https://instagram.com/nutri.jaqueferreira" target="_blank" class="btn-cta">${ctaBtn} →</a>
+    </div>
+
+    <button class="btn-refazer" onclick="refazer()">Refazer o teste</button>
+  `;
+
+  setTimeout(() => {
+    const bar = document.getElementById('score-bar-anim');
+    if (bar) bar.style.width = pct + '%';
+  }, 100);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function refazer() {
+  current = 0;
+  answers = new Array(10).fill(null);
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+</script>
+</body>
+</html>
