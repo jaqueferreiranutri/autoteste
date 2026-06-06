@@ -50,6 +50,17 @@ header{padding:28px 0 20px;text-align:center;border-bottom:.5px solid var(--br);
 .opt.sel{font-weight:500}
 .opt.sel .opt-circle{border-color:var(--v);background:var(--v)}
 .opt.sel .opt-circle::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+
+/* BRISTOL ESPECIAL */
+.bristol-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}
+.bristol-opt{background:#fff;border:.5px solid var(--br2);border-radius:var(--r);padding:14px 12px;cursor:pointer;text-align:center;transition:all .18s ease;font-family:'DM Sans',sans-serif}
+.bristol-opt:hover,.bristol-opt.sel{border-color:var(--v);background:var(--vp)}
+.bristol-opt.sel{border-width:1.5px}
+.bristol-svg{display:block;margin:0 auto 8px}
+.bristol-tipo{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txs);margin-bottom:3px}
+.bristol-desc{font-size:12px;color:var(--txm);line-height:1.4}
+.bristol-opt.sel .bristol-tipo,.bristol-opt.sel .bristol-desc{color:var(--v)}
+
 .nav{display:flex;justify-content:space-between;align-items:center}
 .btn-back{background:transparent;border:none;font-size:13px;color:var(--txs);cursor:pointer;padding:8px 0;font-family:'DM Sans',sans-serif}
 .btn-next{background:var(--v);border:none;border-radius:var(--r);padding:12px 28px;font-size:13.5px;font-weight:500;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 14px rgba(45,107,82,.25)}
@@ -109,7 +120,7 @@ header{padding:28px 0 20px;text-align:center;border-bottom:.5px solid var(--br);
 footer{border-top:.5px solid var(--br);padding:22px 0;text-align:center;margin-top:8px}
 .footer-logo{font-family:'Libre Baskerville',serif;font-style:italic;font-size:12px;color:var(--v);margin-bottom:5px}
 .footer-insta{font-size:11px;color:var(--txs)}
-@media(max-width:480px){.intro-headline{font-size:24px}.score-num{font-size:56px}.dims-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.intro-headline{font-size:24px}.score-num{font-size:56px}.dims-grid{grid-template-columns:1fr}.bristol-opts{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -151,7 +162,7 @@ footer{border-top:.5px solid var(--br);padding:22px 0;text-align:center;margin-t
   <div class="q-wrap" id="q-wrap">
     <div class="q-num" id="q-num"></div>
     <p class="q-text" id="q-text"></p>
-    <div class="opts" id="opts"></div>
+    <div id="opts-container"></div>
   </div>
   <div class="nav">
     <button class="btn-back" id="btn-back" onclick="goBack()" style="visibility:hidden">← Voltar</button>
@@ -180,10 +191,29 @@ footer{border-top:.5px solid var(--br);padding:22px 0;text-align:center;margin-t
 </footer>
 </div>
 <script>
+// SVGs da Escala de Bristol
+const BRISTOL_SVGS = [
+  // Tipo 3-4: Normal
+  '<svg class="bristol-svg" width="60" height="44" viewBox="0 0 60 44"><ellipse cx="30" cy="12" rx="10" ry="8" fill="#8B6F47" opacity=".85"/><ellipse cx="30" cy="26" rx="10" ry="8" fill="#8B6F47" opacity=".85"/><ellipse cx="30" cy="38" rx="8" ry="6" fill="#8B6F47" opacity=".7"/></svg>',
+  // Tipo 1-2: Ressecado / bolinhas
+  '<svg class="bristol-svg" width="60" height="44" viewBox="0 0 60 44"><circle cx="14" cy="12" r="7" fill="#6B4F2A" opacity=".9"/><circle cx="30" cy="8" r="6" fill="#6B4F2A" opacity=".85"/><circle cx="46" cy="14" r="7" fill="#6B4F2A" opacity=".9"/><circle cx="20" cy="30" r="6" fill="#6B4F2A" opacity=".8"/><circle cx="40" cy="32" r="7" fill="#6B4F2A" opacity=".85"/></svg>',
+  // Tipo 5-6: Pastoso / solto
+  '<svg class="bristol-svg" width="60" height="44" viewBox="0 0 60 44"><ellipse cx="30" cy="22" rx="22" ry="14" fill="#A08050" opacity=".7"/><ellipse cx="18" cy="30" rx="12" ry="7" fill="#A08050" opacity=".5"/><ellipse cx="42" cy="28" rx="10" ry="6" fill="#A08050" opacity=".5"/></svg>',
+  // Tipo 7: Líquido / alternando
+  '<svg class="bristol-svg" width="60" height="44" viewBox="0 0 60 44"><ellipse cx="30" cy="28" rx="26" ry="12" fill="#C0A070" opacity=".45"/><path d="M8 22 Q20 10 32 18 Q44 26 52 16" stroke="#C0A070" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/><path d="M10 30 Q22 22 34 28 Q46 34 52 26" stroke="#C0A070" stroke-width="2.5" fill="none" opacity=".4" stroke-linecap="round"/></svg>'
+];
+
+const BRISTOL_OPTS = [
+  {score:0, tipo:'Tipo 3-4', desc:'Formato normal, consistência adequada, sem esforço'},
+  {score:2, tipo:'Tipo 1-2', desc:'Ressecado, em bolinhas, difícil de eliminar'},
+  {score:2, tipo:'Tipo 5-6', desc:'Pastoso, às vezes solto, sem forma definida'},
+  {score:3, tipo:'Tipo 7', desc:'Líquido ou alternando entre preso e solto'}
+];
+
 const Q=[
   {d:'digestao',t:'Sua barriga incha ao longo do dia, mesmo quando você come pouco?',o:['Não, raramente acontece','Às vezes, 1 a 2x por semana','Com frequência, quase todo dia','Sempre, independente do que como']},
   {d:'digestao',t:'Você tem gases constantes ou desconforto abdominal após as refeições?',o:['Não tenho esse problema','Eventualmente, sem me incomodar muito','Com frequência, me atrapalha','Todo dia — evito situações sociais por causa disso']},
-  {d:'digestao',t:'Como é o padrão do seu intestino? (Escala de Bristol)',o:['Tipo 3-4 — formato normal, consistência adequada, sem esforço','Tipo 1-2 — ressecado, em bolinhas, difícil de eliminar','Tipo 5-6 — pastoso, às vezes solto, sem forma definida','Tipo 7 — completamente líquido, ou alternando entre preso e solto sem padrão']},
+  {d:'digestao',t:'BRISTOL',o:[]}, // pergunta especial
   {d:'digestao',t:'Seu intestino funciona de forma irregular — ora prende, ora solta, sem padrão?',o:['Não, funciona normalmente','Eventualmente','Com frequência','É minha realidade todo dia']},
   {d:'energia',t:'Você sente um cansaço que o sono não resolve — acorda cansada mesmo dormindo bem?',o:['Não, acordo disposta','Às vezes','Na maior parte dos dias','Todo dia, sem exceção']},
   {d:'energia',t:'Você tem névoa mental — dificuldade de concentrar ou memória falhando mais do normal?',o:['Não, minha mente está clara','Às vezes, levemente','Com frequência, me atrapalha','Todo dia, é muito intenso']},
@@ -194,18 +224,83 @@ const Q=[
   {d:'peso',t:'Você tem dificuldade para perder peso mesmo quando está se cuidando?',o:['Não, meu peso responde normalmente','Um pouco mais difícil que antes','Muito difícil, parece travado','Completamente travado — nada funciona']},
   {d:'historico',t:'Você já recebeu diagnóstico intestinal — SIBO, disbiose, SII, colite, permeabilidade?',o:['Nunca fiz exames específicos','Fiz exames, nada conclusivo','Tenho diagnóstico mas sem protocolo claro','Tenho diagnóstico e já tentei vários tratamentos sem resultado']}
 ];
+
 const DIMS={digestao:{label:'Digestão',cor:'#2D6B52',fundo:'#E8F4EF',texto:'#1A4D3A'},energia:{label:'Energia & Mente',cor:'#B07A20',fundo:'#FDF5E6',texto:'#6B4A10'},sistemico:{label:'Sintomas Sistêmicos',cor:'#8B2E2E',fundo:'#FBF0F0',texto:'#5A1A1A'},peso:{label:'Metabolismo',cor:'#5A6E9A',fundo:'#EEF1F8',texto:'#2A3A5A'},historico:{label:'Histórico Clínico',cor:'#7A5EA0',fundo:'#F4F0FA',texto:'#3A2060'}};
 const WA='5503598419647';
 let cur=0,ans=new Array(Q.length).fill(null);
+
+function isBristol(idx){return Q[idx].t==='BRISTOL'}
+
 function startQuiz(){document.getElementById('screen-intro').style.display='none';document.getElementById('screen-quiz').style.display='block';render();window.scrollTo({top:0,behavior:'smooth'})}
-function render(){var q=Q[cur];var pct=Math.round((cur/Q.length)*100);document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-pct').textContent=pct+'%';document.getElementById('prog-label').textContent='Pergunta '+(cur+1)+' de '+Q.length;document.getElementById('q-num').textContent='Pergunta '+String(cur+1).padStart(2,'0');document.getElementById('q-text').textContent=q.t;document.getElementById('btn-back').style.visibility=cur>0?'visible':'hidden';var nb=document.getElementById('btn-next');nb.textContent=cur===Q.length-1?'Ver resultado →':'Próxima →';nb.disabled=ans[cur]===null;var el=document.getElementById('opts');el.innerHTML='';q.o.forEach(function(o,i){var b=document.createElement('button');b.className='opt'+(ans[cur]===i?' sel':'');b.innerHTML='<span class="opt-circle"></span><span>'+o+'</span>';b.onclick=function(){ans[cur]=i;render()};el.appendChild(b)});var qw=document.getElementById('q-wrap');qw.style.animation='none';qw.offsetHeight;qw.style.animation='fadeUp .35s ease'}
+
+function render(){
+  var q=Q[cur];
+  var pct=Math.round((cur/Q.length)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-label').textContent='Pergunta '+(cur+1)+' de '+Q.length;
+  document.getElementById('q-num').textContent='Pergunta '+String(cur+1).padStart(2,'0');
+  document.getElementById('btn-back').style.visibility=cur>0?'visible':'hidden';
+  var nb=document.getElementById('btn-next');
+  nb.textContent=cur===Q.length-1?'Ver resultado →':'Próxima →';
+  nb.disabled=ans[cur]===null;
+
+  if(isBristol(cur)){
+    document.getElementById('q-text').textContent='Como é o padrão das suas fezes? (Escala de Bristol)';
+    var container=document.getElementById('opts-container');
+    container.innerHTML='';
+    var grid=document.createElement('div');
+    grid.className='bristol-opts';
+    BRISTOL_OPTS.forEach(function(opt,i){
+      var btn=document.createElement('button');
+      btn.className='bristol-opt'+(ans[cur]===i?' sel':'');
+      btn.innerHTML=BRISTOL_SVGS[i]+'<p class="bristol-tipo">'+opt.tipo+'</p><p class="bristol-desc">'+opt.desc+'</p>';
+      btn.onclick=function(){ans[cur]=i;render()};
+      grid.appendChild(btn);
+    });
+    container.appendChild(grid);
+  } else {
+    document.getElementById('q-text').textContent=q.t;
+    var container=document.getElementById('opts-container');
+    container.innerHTML='';
+    var opts=document.createElement('div');
+    opts.className='opts';
+    q.o.forEach(function(o,i){
+      var b=document.createElement('button');
+      b.className='opt'+(ans[cur]===i?' sel':'');
+      b.innerHTML='<span class="opt-circle"></span><span>'+o+'</span>';
+      b.onclick=function(){ans[cur]=i;render()};
+      opts.appendChild(b);
+    });
+    container.appendChild(opts);
+  }
+
+  var qw=document.getElementById('q-wrap');
+  qw.style.animation='none';qw.offsetHeight;qw.style.animation='fadeUp .35s ease';
+}
+
+function getScore(idx){
+  if(isBristol(idx)){
+    var sel=ans[idx];
+    if(sel===null)return 0;
+    return BRISTOL_OPTS[sel].score;
+  }
+  return ans[idx]||0;
+}
+
 function goNext(){if(ans[cur]===null)return;if(cur<Q.length-1){cur++;render();}else showLead()}
 function goBack(){if(cur>0){cur--;render()}}
+
 function showLead(){document.getElementById('screen-quiz').style.display='none';document.getElementById('screen-lead').style.display='block';window.scrollTo({top:0,behavior:'smooth'});var n=document.getElementById('field-nome');var z=document.getElementById('field-zap');n.focus();function v(){document.getElementById('btn-result').disabled=n.value.trim().length<2||z.value.trim().length<8}n.addEventListener('input',v);z.addEventListener('input',v)}
-async function submitLead(){var nome=document.getElementById('field-nome').value.trim();var zap=document.getElementById('field-zap').value.trim();var email=document.getElementById('field-email').value.trim();if(!nome||zap.length<8)return;var sc=calcScore();try{await fetch('https://script.google.com/macros/s/AKfycbxTFrnerQ0D-4ORYVppaC33v_HsKkaudJZVCuGmJzdfrSLFtj1Linxzy1GxSQyO4GIo/exec',{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({timestamp:new Date().toLocaleString('pt-BR'),nome:nome,whatsapp:zap,email:email,score:sc.health,nivel:getNivel(sc.health).label,digestao:Math.round(sc.dims.digestao?sc.dims.digestao.pct:0)+'%',energia:Math.round(sc.dims.energia?sc.dims.energia.pct:0)+'%',sistemico:Math.round(sc.dims.sistemico?sc.dims.sistemico.pct:0)+'%',peso:Math.round(sc.dims.peso?sc.dims.peso.pct:0)+'%',historico:Math.round(sc.dims.historico?sc.dims.historico.pct:0)+'%',respostas:ans.map(function(a,i){return Q[i].o[a]||'';}).join(' | ')})})}catch(e){}document.getElementById('screen-lead').style.display='none';showResult(nome,sc)}
-function calcScore(){var dims={};var total=0;var maxT=0;Q.forEach(function(q,i){var v=ans[i]||0;total+=v;maxT+=3;if(!dims[q.d])dims[q.d]={score:0,max:0};dims[q.d].score+=v;dims[q.d].max+=3});Object.keys(dims).forEach(function(k){dims[k].pct=(dims[k].score/dims[k].max)*100});var inflam=Math.round((total/maxT)*100);return{health:100-inflam,inflam:inflam,dims:dims}}
+
+async function submitLead(){var nome=document.getElementById('field-nome').value.trim();var zap=document.getElementById('field-zap').value.trim();var email=document.getElementById('field-email').value.trim();if(!nome||zap.length<8)return;var sc=calcScore();try{await fetch('https://script.google.com/macros/s/AKfycbxTFrnerQ0D-4ORYVppaC33v_HsKkaudJZVCuGmJzdfrSLFtj1Linxzy1GxSQyO4GIo/exec',{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({timestamp:new Date().toLocaleString('pt-BR'),nome:nome,whatsapp:zap,email:email,score:sc.health,nivel:getNivel(sc.health).label,digestao:Math.round(sc.dims.digestao?sc.dims.digestao.pct:0)+'%',energia:Math.round(sc.dims.energia?sc.dims.energia.pct:0)+'%',sistemico:Math.round(sc.dims.sistemico?sc.dims.sistemico.pct:0)+'%',peso:Math.round(sc.dims.peso?sc.dims.peso.pct:0)+'%',historico:Math.round(sc.dims.historico?sc.dims.historico.pct:0)+'%',respostas:ans.map(function(a,i){if(isBristol(i))return a!==null?BRISTOL_OPTS[a].tipo:'';return Q[i].o[a]||'';}).join(' | ')})})}catch(e){}document.getElementById('screen-lead').style.display='none';showResult(nome,sc)}
+
+function calcScore(){var dims={};var total=0;var maxT=0;Q.forEach(function(q,i){var v=getScore(i);total+=v;maxT+=3;if(!dims[q.d])dims[q.d]={score:0,max:0};dims[q.d].score+=v;dims[q.d].max+=3});Object.keys(dims).forEach(function(k){dims[k].pct=(dims[k].score/dims[k].max)*100});var inflam=Math.round((total/maxT)*100);return{health:100-inflam,inflam:inflam,dims:dims}}
+
 function getNivel(s){if(s>=70)return{label:'Saudável',cor:'#2D6B52',badge:'b-verde',emoji:'🟢',key:'saudavel'};if(s>=45)return{label:'Atenção',cor:'#B07A20',badge:'b-amber',emoji:'🟡',key:'atencao'};return{label:'Crítico',cor:'#8B2E2E',badge:'b-red',emoji:'🔴',key:'critico'}}
+
 function getNarrativa(dims,nome){var ordenadas=Object.entries(dims).sort(function(a,b){return b[1].pct-a[1].pct});var html='';ordenadas.forEach(function(entry){var dim=entry[0];var data=entry[1];var pct=data.pct;var d=DIMS[dim];if(!d)return;var alto=pct>60;var medio=pct>30;var textos={digestao:{alto:'Quando olhamos para a sua <strong>digestão</strong>, você indicou que o inchaço, os gases e o intestino irregular fazem parte da sua rotina — não como exceção, mas como o dia a dia. Isso não é falta de disciplina nem de força de vontade. É o seu corpo sinalizando que a microbiota intestinal está desequilibrada e produzindo inflamação de forma contínua. <strong>A digestão comprometida é a porta de entrada para todos os outros sintomas que você sente</strong> — o cansaço, o peso, o cabelo, a pele. Tudo começa aqui.',medio:'Quando olhamos para a sua <strong>digestão</strong>, você indicou instabilidade: o intestino ora funciona, ora falha, sem um padrão claro. Esse vai e vem não é normal — é um sinal de disbiose em desenvolvimento. Seu corpo está tentando compensar um desequilíbrio que, se não tratado, tende a se intensificar com o tempo.',baixo:'Quando olhamos para a sua <strong>digestão</strong>, ela está relativamente estável — mas você indicou pequenas irregularidades que merecem atenção. Esses sinais sutis costumam ser os primeiros avisos de um desequilíbrio silencioso.'},energia:{alto:'Quando olhamos para sua <strong>energia e bem-estar mental</strong>, você indicou um cansaço que o sono não resolve, dificuldade de concentrar e oscilações de humor. Isso tem uma explicação clara: <strong>mais de 90% da serotonina — o hormônio que regula o bem-estar, o sono e o humor — é produzida no intestino.</strong> Quando o intestino está inflamado, essa produção cai. O cansaço que você sente não é falta de força de vontade. É bioquímica — e tem solução.',medio:'Quando olhamos para sua <strong>energia e estado mental</strong>, você indicou oscilações que vão além do cansaço comum. Alguns dias você consegue funcionar, outros simplesmente não tem combustível. Esse padrão é característico de quando a inflamação intestinal começa a afetar o eixo intestino-cérebro.',baixo:'Quando olhamos para sua <strong>energia</strong>, ela está razoável — mas você indicou algumas oscilações. O intestino é responsável por grande parte da produção de energia e do equilíbrio do humor. Qualquer desequilíbrio ali se reflete no seu dia a dia.'},sistemico:{alto:'Quando olhamos para os <strong>sintomas que aparecem fora do intestino</strong> — queda de cabelo, dores pelo corpo sem causa aparente, pele reagindo — o quadro é claro: a inflamação já ultrapassou o intestino. <strong>Quando o intestino fica permeável, substâncias que deveriam ficar presas vazam para a corrente sanguínea e criam inflamação em outros órgãos.</strong> A queda de cabelo não é só hormonal. As dores não são sem causa. A pele não está reagindo por acaso. Tudo tem a mesma origem.',medio:'Quando olhamos para os <strong>sintomas que aparecem no resto do corpo</strong>, você indicou queda de cabelo, alterações na pele e dores esporádicas que parecem não ter relação entre si. Na verdade, têm. São sinais de que a inflamação intestinal está começando a se manifestar fora do intestino.',baixo:'Quando olhamos para os <strong>sintomas sistêmicos</strong>, você indicou sinais leves. Eles costumam ser os primeiros avisos de que algo está errado no intestino — muito antes de os sintomas digestivos aparecerem com intensidade.'},peso:{alto:'Quando olhamos para o seu <strong>metabolismo</strong>, você indicou que o peso simplesmente não responde — mesmo quando você se cuida, come bem, tenta fazer tudo certo. Isso tem uma explicação clínica: <strong>a inflamação intestinal bloqueia os receptores de insulina, desregula os hormônios de saciedade e aumenta o cortisol.</strong> Você não está falhando. Está tentando emagrecer com o intestino inflamado — e isso cria um ciclo que nenhuma dieta resolve sozinha.',medio:'Quando olhamos para o seu <strong>metabolismo</strong>, você indicou que o peso está resistente — não responde como deveria para o esforço que você faz. A inflamação intestinal interfere diretamente nos hormônios que controlam o apetite e o acúmulo de gordura, especialmente na região abdominal.',baixo:'Quando olhamos para o seu <strong>metabolismo</strong>, ele está respondendo de forma razoável. Mas se você sente alguma dificuldade com o peso, o intestino pode estar por trás — ele influencia diretamente como o seu corpo processa os alimentos.'},historico:{alto:'Quando olhamos para o seu <strong>histórico clínico</strong>, você indicou que já tem um diagnóstico — SIBO, disbiose, SII, colite ou permeabilidade intestinal. Você sabe que o problema é real. O que você descreveu é a experiência mais comum: receber o nome do que sente, mas sair sem um plano claro. <strong>O diagnóstico é o começo, não o fim.</strong> Cada condição intestinal tem um protocolo específico em fases — e tratar sem respeitar essas fases é o motivo pelo qual a maioria das pessoas melhora um pouco e logo volta ao mesmo lugar.',medio:'Quando olhamos para o seu <strong>histórico clínico</strong>, você já investigou o problema — fez exames, buscou respostas. Mas ainda não encontrou uma abordagem que resolva de vez. Isso é muito comum: os exames apontam algo, mas o tratamento não é estruturado de forma a eliminar a causa raiz.',baixo:'Quando olhamos para o seu <strong>histórico clínico</strong>, você ainda não tem um diagnóstico formal — mas os sintomas que você indicou já apontam para um desequilíbrio intestinal que merece investigação antes que o quadro se torne mais complexo.'}};var nivel=alto?'alto':medio?'medio':'baixo';var txt=textos[dim]?textos[dim][nivel]:'';if(txt){html+='<div class="narrativa-bloco"><span class="narrativa-dim-tag" style="background:'+d.fundo+';color:'+d.cor+'">'+d.label+'</span><p class="narrativa-texto">'+txt+'</p></div>'}});return html}
+
 function showResult(nome,sc){document.getElementById('screen-result').style.display='block';window.scrollTo({top:0,behavior:'smooth'});var nivel=getNivel(sc.health);var ordenadas=Object.entries(sc.dims).sort(function(a,b){return b[1].pct-a[1].pct});var pilarKey=ordenadas[0][0];var pilarDim=DIMS[pilarKey];var introTexto={saudavel:nome+', seu intestino tem uma base razoável — mas os sintomas que você indicou mostram que existe um desequilíbrio em desenvolvimento. Você está no momento certo para agir antes que os sinais se intensifiquem.',atencao:nome+', seu intestino está pedindo atenção. Os sintomas que você descreveu têm um padrão claro de inflamação intestinal moderada — e isso já está afetando sua qualidade de vida de formas que vão muito além da digestão.',critico:nome+', seu intestino está em estado de alerta. O que você descreveu aponta para uma inflamação intestinal intensa e sistêmica — que já está impactando energia, peso, pele, cabelo e humor. Isso tem solução, mas precisa de um protocolo estruturado.'};var pilarTexto={digestao:'Sua digestão é o seu pilar mais comprometido. É dali que partem todos os outros sintomas — e é ali que qualquer protocolo eficaz precisa começar.',energia:'Sua energia e saúde mental são o seu pilar mais comprometido. A inflamação intestinal já está afetando o eixo intestino-cérebro de forma significativa.',sistemico:'Seus sintomas espalhados pelo corpo são o seu pilar mais comprometido — sinal de que a inflamação já ultrapassou o intestino e está se manifestando em outros tecidos.',peso:'Seu metabolismo é o seu pilar mais comprometido. A inflamação intestinal está travando sua capacidade de responder ao esforço que você faz.',historico:'Seu histórico clínico mostra que você já sabe que o problema existe — mas ainda não encontrou o protocolo certo para resolvê-lo de vez.'};var ctaTexto={saudavel:'Você está em um bom momento para agir de forma preventiva. Com ajustes direcionados, é possível fortalecer o que já funciona e fechar os gaps antes que virem um problema maior.',atencao:'O que você está sentindo tem padrão, tem causa e tem solução. Com a abordagem certa — estruturada em fases — os resultados aparecem nos primeiros 30 dias.',critico:'Você já sabe que o problema é real. O que falta não é mais restrição nem mais suplemento genérico. É um protocolo personalizado, com fases claras, que trate a causa raiz do que está acontecendo no seu intestino.'};var segs=Array.from({length:10},function(_,i){var active=(i+1)*10<=sc.inflam;var color=i<3?'#2D6B52':i<6?'#B07A20':'#8B2E2E';return'<div class="seg" style="background:'+(active?color:'#E8E5E0')+'"></div>'}).join('');var waMsg=encodeURIComponent('Olá, Jaqueline! Acabei de fazer o Score de Saúde Intestinal. Meu score foi '+sc.health+'/100 — '+nivel.label+'. Gostaria de conversar sobre meu resultado.');var waLink='https://wa.me/'+WA+'?text='+waMsg;document.getElementById('res-content').innerHTML='<div class="score-hero"><p class="score-hero-tag">Score de Saúde Intestinal — '+nome+'</p><div class="score-row"><span class="score-num" style="color:'+nivel.cor+'">'+sc.health+'</span><div class="score-meta"><p class="score-meta-label">de 100 pontos</p><span class="score-badge '+nivel.badge+'">'+nivel.emoji+' '+nivel.label+'</span></div></div><div class="seg-bar">'+segs+'</div><div class="seg-labels"><span>Crítico</span><span>Atenção</span><span>Saudável</span></div><p class="score-intro">'+introTexto[nivel.key]+'</p></div><div class="dims-section"><p class="dims-title">Análise por dimensão</p><div class="dims-grid">'+ordenadas.map(function(e){var k=e[0];var v=e[1];var d=DIMS[k];return'<div class="dim-card"><p class="dim-label">'+(d?d.label:k)+'</p><div class="dim-bar-wrap"><div class="dim-bar" style="width:'+v.pct+'%;background:'+(v.pct>60?'#8B2E2E':v.pct>30?'#B07A20':'#2D6B52')+'"></div></div><p class="dim-val">'+Math.round(v.pct)+'% comprometido</p></div>'}).join('')+'</div></div><div class="narrativa-section"><p class="narrativa-section-title">O que seus sintomas estão dizendo</p>'+getNarrativa(sc.dims,nome)+'</div><div class="pilar-card" style="background:'+(pilarDim?pilarDim.fundo:'#F5F5F5')+';border:.5px solid '+(pilarDim?pilarDim.cor:'#ccc')+'30"><p class="pilar-tag" style="color:'+(pilarDim?pilarDim.cor:'#333')+'">⚠ Seu pilar mais comprometido</p><p class="pilar-titulo" style="color:'+(pilarDim?pilarDim.texto:'#1A1A18')+'">'+(pilarDim?pilarDim.label:pilarKey)+'</p><p class="pilar-texto" style="color:'+(pilarDim?pilarDim.texto:'#4A4845')+'">'+(pilarTexto[pilarKey]||'')+'</p></div><div class="cta-card"><h2>Foi por isso que eu criei o Método VITA.</h2><p>'+nome+', o que você descreveu aqui tem padrão. Tem causa. E tem solução.</p><p>'+ctaTexto[nivel.key]+'</p><p>O Método VITA foi construído para momentos como este — para você não continuar tentando no escuro. Todo processo de recuperação intestinal passa por fases, e o VITA foi desenhado para guiar você por cada uma delas, com clareza e sem mais restrições desnecessárias.</p><p>Seu perfil mostra que, com os ajustes certos, você pode recuperar sua digestão, sua energia e sua liberdade alimentar.</p><a href="'+waLink+'" target="_blank" class="btn-cta"><span style="font-size:18px">💬</span>Continuar — descobrir meu plano no WhatsApp</a></div><button class="btn-refazer" onclick="refazer()">Refazer o teste</button><p class="disclaimer">Este score é uma ferramenta educativa de triagem e não substitui avaliação clínica. Apenas um profissional de saúde pode diagnosticar e tratar condições intestinais. · @nutri.jaqueferreira</p>'}
 function refazer(){cur=0;ans=new Array(Q.length).fill(null);document.getElementById('screen-result').style.display='none';document.getElementById('screen-lead').style.display='none';document.getElementById('screen-quiz').style.display='none';document.getElementById('screen-intro').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
 </script>
